@@ -1,0 +1,17 @@
+dysperia <- read.csv("d:/haplox/papers/dysperia/dyspepsia.csv")
+dysperia[,10] <- as.numeric(gsub("\\s\\(.*?\\)", "",dysperia[,8]))
+rate <- transform(dysperia, p=V10 / Sample.size,log=log(V10/ Sample.size),
+logit=log((V10 / Sample.size) / (1-V10 / Sample.size)), arcsin=asin(sqrt(V10 / (Sample.size +1))), darcsin =0.5*(asin(sqrt(V10 / (Sample.size+1)))+asin (sqrt((V10+1) / (Sample.size+1)))))
+shapiro.test(rate$p)
+shapiro.test(rate$log)
+shapiro.test(rate$logit)
+shapiro.test(rate$arcsin)
+shapiro.test(rate$darcsin)
+library(meta)
+metarate <- metaprop(V10,Sample.size,data=rate, sm="PLOGIT",iner=0.5,allincr = TRUE,addincr = FALSE,title="")
+pdf("d:/haplox/papers/dysperia/dyspepsia.pdf",onefile=TRUE,width=14)
+forest (metarate, digits=2)
+funnel(metarate)
+metabias(metarate,method ="linreg", plotit=TRUE, k.min=10)
+dev.off()
+
